@@ -14,9 +14,6 @@ const minioClient = new Minio.Client({
   region: 'us-east-1' 
 });
 
-const https = require('https');
-minioClient.transport = https;
-
 // Forzamos un agente de transporte más robusto para Railway
 const https = require('https');
 minioClient.transport = https;
