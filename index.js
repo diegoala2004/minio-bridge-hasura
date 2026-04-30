@@ -7,7 +7,7 @@ app.use(express.json());
 
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 443, // Volvemos al 443 porque el 9000 está bloqueado
+  port: 443, 
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
@@ -24,25 +24,29 @@ app.post('/get-url', async (req, res) => {
   const bucketName = 'evidencias';
 
   try {
-    // IMPORTANTE: Agregamos el header de contenido en la firma
-    // Esto obliga a MinIO y Nginx a esperar un archivo, no una carga de web
+    // Definimos el método HTTP y los headers que queremos firmar
+    const method = 'PUT';
+    const expires = 600; // 10 minutos
+    
+    // EstereqParams fuerza a que la firma espere un binario
     const reqParams = {
-      'Content-Type': 'application/octet-stream',
+      'content-type': 'application/octet-stream'
     };
 
-    const uploadUrl = await minioClient.presignedPutUrl('PUT', bucketName, file_name, 600, reqParams);
+    // EL MÉTODO CORRECTO ES presignedUrl
+    const uploadUrl = await minioClient.presignedUrl(method, bucketName, file_name, expires, reqParams);
     
-    console.log(`URL firmada con headers para: ${file_name}`);
+    console.log(`URL firmada con éxito para: ${file_name}`);
 
     res.json({
       upload_url: uploadUrl,
       file_path: `${bucketName}/${file_name}`
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error detallado en el Bridge:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Bridge Supermarket Blacklist activo`));
+app.listen(PORT, () => console.log(`🚀 Bridge activo en puerto ${PORT}`));
