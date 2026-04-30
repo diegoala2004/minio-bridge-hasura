@@ -11,7 +11,11 @@ const minioClient = new Minio.Client({
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
-  // region: 'us-east-1' 
+  // IMPORTANTE: Algunos servidores privados de MinIO requieren 
+  // que definas la región aunque sea genérica o 'us-east-1'
+  region: 'us-east-1',
+  // AÑADE ESTO: Fuerza al SDK a no intentar usar subdominios para el bucket
+  pathStyle: true 
 });
 
 // Forzamos un agente de transporte más robusto para Railway
