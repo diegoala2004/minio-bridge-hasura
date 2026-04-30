@@ -6,30 +6,32 @@ const app = express();
 app.use(express.json());
 
 const minioClient = new Minio.Client({
-  endPoint: process.env.MINIO_ENDPOINT || 'storage33.e-mcy.icarosoft.com',
-  port: parseInt(process.env.MINIO_PORT) || 9000,
+  endPoint: 'storage33.e-mcy.icarosoft.com',
+  // Si el puerto 9000 falla en la nube, el 443 es la alternativa universal
+  port: 443, 
   useSSL: true,
-  accessKey: process.env.MINIO_ACCESS_KEY, // <--- Verifica que esto coincida con Railway
-  secretKey: process.env.MINIO_SECRET_KEY  // <--- Verifica que esto coincida con Railway
+  accessKey: process.env.MINIO_ACCESS_KEY,
+  secretKey: process.env.MINIO_SECRET_KEY
 });
 
 app.post('/get-url', async (req, res) => {
-  // Hasura envía los datos en req.body.input
   const { file_name } = req.body.input;
-  
+  const bucketName = 'evidencias';
+
   try {
-    // Genera URL para subida (putObject) válida por 600 segundos (10 min)
-    const url = await minioClient.presignedPutObject('evidencias', file_name, 600);
+    // Generamos la URL para subir el archivo (válida por 10 minutos)
+    const uploadUrl = await minioClient.presignedPutUrl(bucketName, file_name, 10 * 60);
     
+    // Devolvemos la respuesta que Hasura espera
     res.json({
-      upload_url: url,
-      file_path: `evidencias/${file_name}`
+      upload_url: uploadUrl,
+      file_path: `${bucketName}/${file_name}`
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error('Error de MinIO:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Cambia la última línea de tu index.js por esta:
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor listo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Bridge activo en puerto ${PORT}`));
