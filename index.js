@@ -5,24 +5,17 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+// Configuración optimizada para MinIO detrás de Nginx
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
   port: 443, 
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
-  // IMPORTANTE: Algunos servidores privados de MinIO requieren 
-  // que definas la región aunque sea genérica o 'us-east-1'
   region: 'us-east-1',
-  // AÑADE ESTO: Fuerza al SDK a no intentar usar subdominios para el bucket
+  // VITAL: Nginx no suele manejar bien los subdominios de buckets (bucket.dominio.com)
   pathStyle: true 
 });
-
-// Forzamos un agente de transporte más robusto para Railway
-const https = require('https');
-minioClient.transport = https;
-
-minioClient.protocol = 'https:';
 
 app.post('/get-url', async (req, res) => {
   if (!req.body.input || !req.body.input.file_name) {
@@ -33,13 +26,17 @@ app.post('/get-url', async (req, res) => {
   const bucketName = 'evidencias';
 
   try {
-    // Usamos el nombre correcto de la función
+    // Generamos la URL firmada
     const uploadUrl = await minioClient.presignedPutObject(bucketName, file_name, 600);
     
-    console.log('URL generada con éxito');
+    console.log(`URL generada para: ${file_name}`);
+
+    // Enviamos una respuesta más completa
     res.json({
       upload_url: uploadUrl,
-      file_path: `${bucketName}/${file_name}`
+      file_path: `${bucketName}/${file_name}`,
+      // Le avisamos al frontend/Apidog qué headers son obligatorios para que Nginx no lo rebote
+      message: "Asegúrate de usar el método PUT y enviar el archivo en formato Binary"
     });
   } catch (error) {
     console.error('Error detallado de MinIO:', error);
@@ -48,4 +45,4 @@ app.post('/get-url', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Bridge activo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Supermarket Bridge activo en puerto ${PORT}`));
