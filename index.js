@@ -7,14 +7,13 @@ app.use(express.json());
 
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 9000, 
+  port: 443, // <--- Puerto web que sí responde
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
 });
 
 app.post('/get-url', async (req, res) => {
-  // Manejo de errores para asegurar que la entrada existe
   if (!req.body.input || !req.body.input.file_name) {
     return res.status(400).json({ error: "file_name is required" });
   }
@@ -23,8 +22,8 @@ app.post('/get-url', async (req, res) => {
   const bucketName = 'evidencias';
 
   try {
-    // EL CAMBIO CLAVE: presignedPutObject en lugar de presignedPutUrl
-    const uploadUrl = await minioClient.presignedPutObject(bucketName, file_name, 10 * 60);
+    // Generamos la URL firmada
+    const uploadUrl = await minioClient.presignedPutObject(bucketName, file_name, 600);
     
     res.json({
       upload_url: uploadUrl,
