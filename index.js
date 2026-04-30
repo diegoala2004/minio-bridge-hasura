@@ -11,7 +11,7 @@ const minioClient = new Minio.Client({
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
-  region: 'us-east-1' 
+  // region: 'us-east-1' 
 });
 
 // Forzamos un agente de transporte más robusto para Railway
