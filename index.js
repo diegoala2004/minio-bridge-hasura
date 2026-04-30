@@ -11,8 +11,8 @@ const minioClient = new Minio.Client({
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
-  // Agregamos esto para evitar que la conexión se quede colgada
-  region: 'us-east-1' 
+  // ESTA ES LA LÍNEA CLAVE:
+  baseUrl: 'https://storage33.e-mcy.icarosoft.com:9000' 
 });
 
 // Forzamos un agente de transporte más robusto para Railway
