@@ -8,7 +8,7 @@ app.use(express.json());
 // Configuración optimizada para MinIO detrás de Nginx
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 443, 
+  port: 9000, 
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
