@@ -1,0 +1,1 @@
+# minio-bridge-hasura
