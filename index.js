@@ -36,7 +36,6 @@ app.post('/get-url', async (req, res) => {
       upload_url: uploadUrl,
       file_path: `${bucketName}/${file_name}`,
       // Le avisamos al frontend/Apidog qué headers son obligatorios para que Nginx no lo rebote
-      message: "Asegúrate de usar el método PUT y enviar el archivo en formato Binary"
     });
   } catch (error) {
     console.error('Error detallado de MinIO:', error);
