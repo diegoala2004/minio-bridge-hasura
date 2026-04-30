@@ -5,10 +5,11 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
+// Configuramos el cliente apuntando estrictamente al puerto 9000
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 443, // <--- Puerto web que sí responde
-  useSSL: true,
+  port: 9000, 
+  useSSL: true, // storage33 usa SSL incluso en el 9000
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
 });
@@ -22,15 +23,16 @@ app.post('/get-url', async (req, res) => {
   const bucketName = 'evidencias';
 
   try {
-    // Generamos la URL firmada
+    // Usamos el nombre correcto de la función
     const uploadUrl = await minioClient.presignedPutObject(bucketName, file_name, 600);
     
+    console.log('URL generada con éxito');
     res.json({
       upload_url: uploadUrl,
       file_path: `${bucketName}/${file_name}`
     });
   } catch (error) {
-    console.error('Error de MinIO:', error);
+    console.error('Error detallado de MinIO:', error);
     res.status(500).json({ error: error.message });
   }
 });
