@@ -7,22 +7,25 @@ app.use(express.json());
 
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  // Si el puerto 9000 falla en la nube, el 443 es la alternativa universal
-  port: 443, 
+  port: 9000, 
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
 });
 
 app.post('/get-url', async (req, res) => {
+  // Manejo de errores para asegurar que la entrada existe
+  if (!req.body.input || !req.body.input.file_name) {
+    return res.status(400).json({ error: "file_name is required" });
+  }
+
   const { file_name } = req.body.input;
   const bucketName = 'evidencias';
 
   try {
-    // Generamos la URL para subir el archivo (válida por 10 minutos)
-    const uploadUrl = await minioClient.presignedPutUrl(bucketName, file_name, 10 * 60);
+    // EL CAMBIO CLAVE: presignedPutObject en lugar de presignedPutUrl
+    const uploadUrl = await minioClient.presignedPutObject(bucketName, file_name, 10 * 60);
     
-    // Devolvemos la respuesta que Hasura espera
     res.json({
       upload_url: uploadUrl,
       file_path: `${bucketName}/${file_name}`
