@@ -18,9 +18,6 @@ const minioClient = new Minio.Client({
 const https = require('https');
 minioClient.transport = https;
 
-// Forzamos el puerto manualmente en el objeto para saltar restricciones
-minioClient.port = 443;
-
 app.post('/get-url', async (req, res) => {
   if (!req.body.input || !req.body.input.file_name) {
     return res.status(400).json({ error: "file_name is required" });
