@@ -7,11 +7,17 @@ app.use(express.json());
 
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  // No pongas port: 9000 ni 443 aquí, vamos a usar una técnica de forzado
+  port: 9000, 
   useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
-  secretKey: process.env.MINIO_SECRET_KEY
+  secretKey: process.env.MINIO_SECRET_KEY,
+  // Agregamos esto para evitar que la conexión se quede colgada
+  region: 'us-east-1' 
 });
+
+// Forzamos un agente de transporte más robusto para Railway
+const https = require('https');
+minioClient.transport = https;
 
 // Forzamos el puerto manualmente en el objeto para saltar restricciones
 minioClient.port = 443;
