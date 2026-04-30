@@ -5,14 +5,16 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-// Configuramos el cliente apuntando estrictamente al puerto 9000
 const minioClient = new Minio.Client({
   endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 9000, 
-  useSSL: true, // storage33 usa SSL incluso en el 9000
+  // No pongas port: 9000 ni 443 aquí, vamos a usar una técnica de forzado
+  useSSL: true,
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY
 });
+
+// Forzamos el puerto manualmente en el objeto para saltar restricciones
+minioClient.port = 443;
 
 app.post('/get-url', async (req, res) => {
   if (!req.body.input || !req.body.input.file_name) {
