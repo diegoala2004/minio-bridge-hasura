@@ -6,11 +6,11 @@ const app = express();
 app.use(express.json());
 
 const minioClient = new Minio.Client({
-  endPoint: 'storage33.e-mcy.icarosoft.com',
-  port: 9000,      // Puerto de la API de MinIO
-  useSSL: true,    // Mantenlo en true
-  accessKey: process.env.MINIO_ACCESS_KEY,
-  secretKey: process.env.MINIO_SECRET_KEY
+  endPoint: process.env.MINIO_ENDPOINT || 'storage33.e-mcy.icarosoft.com',
+  port: parseInt(process.env.MINIO_PORT) || 9000,
+  useSSL: true,
+  accessKey: process.env.MINIO_ACCESS_KEY, // <--- Verifica que esto coincida con Railway
+  secretKey: process.env.MINIO_SECRET_KEY  // <--- Verifica que esto coincida con Railway
 });
 
 app.post('/get-url', async (req, res) => {
